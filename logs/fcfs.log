@@ -1,0 +1,88 @@
+=== Simulación de línea de ensamblaje (FCFS) ===
+[Generador] Producto 01 disponible en t=0.000s
+[Corte] Producto 01 inicia tramo de 0.400s (restante: 0.400s)
+[Generador] Producto 02 disponible en t=0.120s
+[Generador] Producto 03 disponible en t=0.260s
+[Generador] Producto 04 disponible en t=0.380s
+[Corte] Producto 01 completó la estación (tiempo total restante 0)
+[Corte] Producto 02 inicia tramo de 0.400s (restante: 0.400s)
+[Ensamblaje] Producto 01 inicia tramo de 0.600s (restante: 0.600s)
+[Generador] Producto 05 disponible en t=0.540s
+[Generador] Producto 06 disponible en t=0.720s
+[Corte] Producto 02 completó la estación (tiempo total restante 0)
+[Corte] Producto 03 inicia tramo de 0.400s (restante: 0.400s)
+[Generador] Producto 07 disponible en t=0.900s
+[Ensamblaje] Producto 01 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 02 inicia tramo de 0.600s (restante: 0.600s)
+[Empaque] Producto 01 inicia tramo de 0.500s (restante: 0.500s)
+[Generador] Producto 08 disponible en t=1.100s
+[Corte] Producto 03 completó la estación (tiempo total restante 0)
+[Corte] Producto 04 inicia tramo de 0.400s (restante: 0.400s)
+[Generador] Producto 09 disponible en t=1.300s
+[Generador] Producto 10 disponible en t=1.500s
+[Empaque] Producto 01 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 02 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 03 inicia tramo de 0.600s (restante: 0.600s)
+[Corte] Producto 04 completó la estación (tiempo total restante 0)
+[Corte] Producto 05 inicia tramo de 0.400s (restante: 0.400s)
+[Empaque] Producto 02 inicia tramo de 0.500s (restante: 0.500s)
+[Corte] Producto 05 completó la estación (tiempo total restante 0)
+[Corte] Producto 06 inicia tramo de 0.400s (restante: 0.400s)
+[Empaque] Producto 02 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 03 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 04 inicia tramo de 0.600s (restante: 0.600s)
+[Empaque] Producto 03 inicia tramo de 0.500s (restante: 0.500s)
+[Corte] Producto 06 completó la estación (tiempo total restante 0)
+[Corte] Producto 07 inicia tramo de 0.400s (restante: 0.400s)
+[Empaque] Producto 03 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 04 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 05 inicia tramo de 0.600s (restante: 0.600s)
+[Empaque] Producto 04 inicia tramo de 0.500s (restante: 0.500s)
+[Corte] Producto 07 completó la estación (tiempo total restante 0)
+[Corte] Producto 08 inicia tramo de 0.400s (restante: 0.400s)
+[Corte] Producto 08 completó la estación (tiempo total restante 0)
+[Corte] Producto 09 inicia tramo de 0.400s (restante: 0.400s)
+[Empaque] Producto 04 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 05 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 06 inicia tramo de 0.600s (restante: 0.600s)
+[Empaque] Producto 05 inicia tramo de 0.500s (restante: 0.500s)
+[Corte] Producto 09 completó la estación (tiempo total restante 0)
+[Corte] Producto 10 inicia tramo de 0.400s (restante: 0.400s)
+[Empaque] Producto 05 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 06 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 07 inicia tramo de 0.600s (restante: 0.600s)
+[Empaque] Producto 06 inicia tramo de 0.500s (restante: 0.500s)
+[Corte] Producto 10 completó la estación (tiempo total restante 0)
+[Empaque] Producto 06 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 07 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 08 inicia tramo de 0.600s (restante: 0.600s)
+[Empaque] Producto 07 inicia tramo de 0.500s (restante: 0.500s)
+[Empaque] Producto 07 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 08 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 09 inicia tramo de 0.600s (restante: 0.600s)
+[Empaque] Producto 08 inicia tramo de 0.500s (restante: 0.500s)
+[Empaque] Producto 08 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 09 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 10 inicia tramo de 0.600s (restante: 0.600s)
+[Empaque] Producto 09 inicia tramo de 0.500s (restante: 0.500s)
+[Empaque] Producto 09 completó la estación (tiempo total restante 0)
+[Ensamblaje] Producto 10 completó la estación (tiempo total restante 0)
+[Empaque] Producto 10 inicia tramo de 0.500s (restante: 0.500s)
+[Empaque] Producto 10 completó la estación (tiempo total restante 0)
+
+=== Resultados ===
+  Prod     Llegada         Corte        Ensamblaje        Empaque        Espera      Turnaround   
+  #01       0.000s     0.001s-0.401s   0.401s-1.001s   1.001s-1.501s     0.000s        1.501s     
+  #02       0.120s     0.401s-0.801s   1.001s-1.601s   1.602s-2.102s     0.000s        1.982s     
+  #03       0.260s     0.801s-1.201s   1.601s-2.202s   2.202s-2.702s     0.400s        2.442s     
+  #04       0.380s     1.201s-1.602s   2.202s-2.802s   2.802s-3.302s     0.800s        2.922s     
+  #05       0.540s     1.602s-2.002s   2.802s-3.402s   3.403s-3.903s     1.400s        3.362s     
+  #06       0.720s     2.002s-2.402s   3.402s-4.003s   4.003s-4.503s     1.801s        3.783s     
+  #07       0.900s     2.402s-2.802s   4.003s-4.603s   4.603s-5.103s     1.801s        4.203s     
+  #08       1.100s     2.802s-3.203s   4.603s-5.203s   5.203s-5.704s     2.801s        4.603s     
+  #09       1.300s     3.203s-3.603s   5.203s-5.803s   5.804s-6.304s     2.801s        5.004s     
+  #10       1.500s     3.604s-4.004s   5.803s-6.404s   6.404s-6.904s     3.202s        5.404s     
+
+Promedio de espera: 1.501s
+Promedio de turnaround: 3.521s
+Orden final de terminación: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

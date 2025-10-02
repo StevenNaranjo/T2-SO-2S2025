@@ -45,6 +45,7 @@ Se incluyen dos archivos en `logs/` con ejecuciones completas:
 
 * La cantidad de productos y los tiempos de procesamiento por estación están definidos en el código, pero pueden ajustarse fácilmente en `run_simulation`.
 * En Round Robin el quantum provoca reencolado de productos, lo que incrementa los tiempos de espera y permite comparar el comportamiento frente a FCFS.
+
 # T2-SO-2S2025
 Sincronizacion y Algoritmos de Scheduling
 

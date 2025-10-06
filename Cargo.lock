@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "T2-SO-2S2025"
+name = "assembly-line-simulator"
 version = "0.1.0"

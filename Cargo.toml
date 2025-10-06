@@ -1,6 +1,17 @@
 [package]
-name = "T2-SO-2S2025"
+name = "assembly-line-simulator"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["Estudiante SO"]
+description = "Simulador de línea de ensamblaje con algoritmos de scheduling"
+license = "MIT"
+
+[[bin]]
+name = "assembly-line-simulator"
+path = "src/main.rs"
+
+[lib]
+name = "assembly_line_simulator"
+path = "src/lib.rs"
 
 [dependencies]

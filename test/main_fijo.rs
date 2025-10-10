@@ -1,4 +1,7 @@
+#[path = "../src/estaciones.rs"]
 mod estaciones;
+
+#[path = "../src/funciones.rs"]
 mod funciones;
 
 use std::sync::Arc;

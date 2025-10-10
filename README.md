@@ -4,8 +4,6 @@ Este proyecto implementa en Rust un simulador de una línea de ensamblaje compue
 
 ## Requisitos
 
-* Rust 1.70 o superior.
-* Cargo para compilar y ejecutar el proyecto.
 
 ## Ejecución
 

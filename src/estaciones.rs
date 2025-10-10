@@ -17,6 +17,7 @@ pub struct Product {
 }
 
 impl Product {
+    /// Crea un producto con métricas en 0.
     pub fn new(id: i32, arrival_ms: i32) -> Self {
         Self {
             id,
@@ -30,21 +31,26 @@ impl Product {
     }
 }
 
+/// puntero compartido y seguro a mutuo acceso de un Product.
+/// - `Arc` permite compartir entre hilos.
+/// - `Mutex` protege el acceso concurrente al `Product`.
 pub type SharedProduct = Arc<Mutex<Product>>;
 
-/// Cola acotada bloqueante (items/spaces ~ Condvar).
-pub struct ProdQueue {
-    inner: Mutex<Inner>,
-    not_empty: Condvar,
-    not_full: Condvar,
-    capacity: usize,
-}
-
+/// Estructura con el buffer real (VecDeque) de punteros a productos.
 struct Inner {
     buf: VecDeque<SharedProduct>,
 }
 
+/// Cola acotada bloqueante.
+pub struct ProdQueue {
+    inner: Mutex<Inner>,    // Estado interno protegido por `Mutex`.
+    not_empty: Condvar,     // Señal usada para despertar consumidores cuando la cola deja de estar vacía.
+    not_full: Condvar,      // Señal usada para despertar productores cuando la cola deja de estar llena.
+    capacity: usize,        // Capacidad máxima de la cola.
+}
+
 impl ProdQueue {
+    /// Construye la cola acotada con la capacidad indicada y la envuelve en `Arc` para poder clonarla y compartirla entre hilos.
     pub fn new(capacity: usize) -> Arc<Self> {
         Arc::new(Self {
             inner: Mutex::new(Inner { buf: VecDeque::with_capacity(capacity) }),
@@ -54,25 +60,28 @@ impl ProdQueue {
         })
     }
 
+    // Encola un elemento. Si la cola está llena, se bloquea hasta que haya espacio.
     pub fn push(&self, item: SharedProduct) {
-        let mut g = self.inner.lock().unwrap();
-        while g.buf.len() == self.capacity {
-            g = self.not_full.wait(g).unwrap();
+        let mut g = self.inner.lock().unwrap();     // Toma el lock del estado interno.
+        while g.buf.len() == self.capacity {        
+            g = self.not_full.wait(g).unwrap();     // Mientras esté llena, espera a `not_full`.
         }
         g.buf.push_back(item);
-        self.not_empty.notify_one();
+        self.not_empty.notify_one();                // Despierta a un consumidor que esté esperando a `not_empty`.
     }
 
+    // Desencola un elemento. Si la cola está vacía, se bloquea hasta que haya ítems.
     pub fn pop(&self) -> SharedProduct {
-        let mut g = self.inner.lock().unwrap();
+        let mut g = self.inner.lock().unwrap();     // Toma el lock del estado interno.
         while g.buf.is_empty() {
-            g = self.not_empty.wait(g).unwrap();
+            g = self.not_empty.wait(g).unwrap();    // Mientras esté vacía, espera a `not_empty`
         }
         let it = g.buf.pop_front().expect("checked non-empty");
-        self.not_full.notify_one();
+        self.not_full.notify_one();                 // Despierta a un productor que esté esperando a `not_full`.
         it
     }
 
+    // Devuelve el tamaño actual de la cola.
     pub fn len(&self) -> usize {
         self.inner.lock().unwrap().buf.len()
     }

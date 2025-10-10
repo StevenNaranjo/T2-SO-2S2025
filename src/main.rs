@@ -9,37 +9,43 @@ use std::time::Instant;
 use estaciones::{Product, ProdQueue, SharedProduct, QUEUE_CAPACITY, sleep_ms, ms_since};
 use funciones::{estacion_fcfs, estacion_round_robin};
 
+/// Fila del informe final con las métricas de cada producto tras pasar por 3 estaciones.
 #[derive(Debug)]
 struct ReportRow {
-    id: i32,
-    arrival: i32,
-    e1_in: i64,  e1_out: i64,
-    e2_in: i64,  e2_out: i64,
-    e3_in: i64,  e3_out: i64,
-    turnaround: i64,
-    wait_time: i64,
+    id: i32,                    // ID del producto
+    arrival: i32,               // llegada real (ms desde start) medida por el generador
+    e1_in: i64,  e1_out: i64,   // tiempos de entrada/salida en estación 1
+    e2_in: i64,  e2_out: i64,   // tiempos de entrada/salida en estación 2
+    e3_in: i64,  e3_out: i64,   // tiempos de entrada/salida en estación 3
+    turnaround: i64,            // tiempo total en el sistema = e3_out - arrival
+    wait_time: i64,             // tiempo total de espera = turnaround - (suma de work_ms de cada estación)
 }
 
+/// Tipo de planificación de una estación: FCFS o RR (con quantum).
 #[derive(Clone, Copy, Debug)]
 enum StationKind {
     Fcfs,
     Rr { q: i32 },
 }
 
+/// Configuración concreta de una estación: tipo y duración de servicio.
 #[derive(Clone, Copy, Debug)]
 struct StationCfg {
     kind: StationKind,
     work_ms: i32,
 }
 
+/// Parseo de CLI para una estación: <tipo> <dur_ms> [<q_si_es_rr>]
 fn parse_station(args: &[String], idx: &mut usize, label: &str) -> Result<StationCfg, String> {
+    
+    // Verifica que haya al menos un token para el tipo
     if *idx >= args.len() {
         return Err(format!("Faltan argumentos para {}", label));
     }
     let ty = args[*idx].to_lowercase();
     *idx += 1;
 
-    // siempre se espera duración después del tipo
+    // Siempre se espera la duración a continuación
     if *idx >= args.len() {
         return Err(format!("Falta duración (ms) para {}", label));
     }
@@ -51,6 +57,7 @@ fn parse_station(args: &[String], idx: &mut usize, label: &str) -> Result<Statio
     }
     *idx += 1;
 
+    // Si es rr, también espera quantum; si es fcfs, no espera nada más
     match ty.as_str() {
         "fcfs" => Ok(StationCfg { kind: StationKind::Fcfs, work_ms }),
         "rr" => {
@@ -70,6 +77,7 @@ fn parse_station(args: &[String], idx: &mut usize, label: &str) -> Result<Statio
     }
 }
 
+/// Imprime la tabla del informe con promedios.
 fn print_report(rows: &[ReportRow]) {
     // Cabecera
     println!("\n{:=^120}", "  INFORME FINAL  ");
@@ -132,8 +140,7 @@ fn main() {
     });
 
     // ---------- CONFIGURACIÓN ----------
-    // Llegadas manuales. *(se interpretan como offsets desde start)*
-    let arrivals_ms: Vec<i32> = vec![0, 0, 50, 50, 100, 100, 150, 200, 250, 300];
+    let arrivals_ms: Vec<i32> = vec![0, 0, 50, 50, 100, 100, 150, 200, 250, 300];   // Llegadas programadas como offsets en ms desde `start`.
     let n_products = arrivals_ms.len();
 
     // ---------- RELOJ ----------
@@ -146,26 +153,30 @@ fn main() {
     let q_done  = ProdQueue::new(QUEUE_CAPACITY);
 
     // ---------- GENERADOR ----------
+    // Hilo productor que crea productos y los va encolando en E1 según sus offsets.
     {
         let q_e1_in = Arc::clone(&q_e1_in);
         let start0 = start;
         thread::spawn(move || {
-            // interpreta arrivals_ms como OFFSETS (ms desde start)
+            // Interpreta arrivals_ms como offsets (ms desde start)
             for (i, &offset_ms) in arrivals_ms.iter().enumerate() {
+
+                // Cada producto es un Arc<Mutex<Product>> para compartirlo entre hilos con seguridad
                 let sp: SharedProduct = Arc::new(std::sync::Mutex::new(Product::new(i as i32, 0)));
 
-                // espera hasta el offset indicado
+                // Espera hasta su tiempo de llegada programado
                 sleep_ms(offset_ms);
 
-                // registra la hora REAL de llegada
+                // Registra la hora real de llegada
                 let arrival_now = ms_since(start0) as i32;
                 {
                     let mut p = sp.lock().unwrap();
                     p.arrival_ms = arrival_now;
                 }
 
-                println!("{}ms, Generador: Encolando producto #{} (arrival real: {} ms, offset pedido: {} ms)",
-                         ms_since(start0), i, arrival_now, offset_ms);
+                println!("{}ms, Generador: Encolando producto #{} (arrival real: {} ms, offset pedido: {} ms)", ms_since(start0), i, arrival_now, offset_ms);
+
+                // Encola a la estación 1
                 q_e1_in.push(sp);
             }
         });
@@ -236,9 +247,11 @@ fn main() {
     let mut report_rows: Vec<ReportRow> = Vec::with_capacity(n_products);
 
     while finished < n_products {
+
+        // Espera el próximo producto finalizado
         let sp = q_done.pop();
 
-        // Tomamos el lock SOLO para leer/copiar los datos; marcamos terminado aquí.
+        // Lee todos los campos que necesita bajo lock y calcula métricas
         let (id, arrival, e1_in, e1_out, e2_in, e2_out, e3_in, e3_out, turnaround, wait_time);
         {
             let mut p = sp.lock().unwrap();
@@ -250,13 +263,17 @@ fn main() {
             e2_in = p.entry_time[1];  e2_out = p.exit_time[1];
             e3_in = p.entry_time[2];  e3_out = p.exit_time[2];
 
+            // turnaround: tiempo total desde llegada real hasta salida de E3
             turnaround = e3_out - arrival as i64;
 
-            // total de servicio efectivo = suma de work_ms de cada estación
+            // tiempo de servicio total: suma de las duraciones configuradas
             let processing_sum = (e1.work_ms + e2.work_ms + e3.work_ms) as i64;
-            wait_time = turnaround - processing_sum;
-        } // <-- se libera el mutex aquí
 
+            // espera total: turnaround - servicio
+            wait_time = turnaround - processing_sum;
+        } // Se libera el mutex aquí
+
+        // Guarda la fila en el vector para imprimir luego
         report_rows.push(ReportRow {
             id, arrival, e1_in, e1_out, e2_in, e2_out, e3_in, e3_out, turnaround, wait_time,
         });

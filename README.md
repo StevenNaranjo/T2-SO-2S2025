@@ -20,15 +20,18 @@ El objetivo es analizar el impacto de ambos algoritmos en métricas como el tiem
 
 ### Estructura del Proyecto
 
-```
+```bash
 T2-SO-2S2025/
 ├── src/
-│   ├── main.rs
-│   ├── estaciones.rs
-│   ├── funciones.rs
+│   ├── main.rs                 # Punto de entrada, configuración y generación de estadísticas.
+│   ├── estaciones.rs           # Structs de colas con mutex, productos y cálculo de tiempos.
+│   └── funciones.rs            # Implementa los algoritmos de scheduling.
+├── test/
+│   ├── main_individual.rs      # Para hacer pruebas con una sola estación a la vez.
+│   └── mutex_demo.rs           # Prueba de concepto de exclusión mútua.
 ├── Cargo.toml
-├── README.md
-└── informe.md
+├── README.md                   # Este archivo.
+└── informe.md                  # Informe técnico de la solución.
 ```
 
 ---
@@ -54,6 +57,19 @@ El programa recibe tres parámetros, uno por estación, indicando el **algoritmo
 ```bash
 cargo run -- <E1_alg> <E1_tiempo> [<E1_q>] <E2_alg> <E2_tiempo> [<E2_q>] <E3_alg> <E3_tiempo> [<E3_q>]
 ```
+
+## Configuración
+En el archivo `src/main.rs`, en la función `main()` es posible localizar en la sección de configuración el array de las llegadas de los procesos. Estos son el tiempo en milisegundos que hay entre la entrada de un proceso y el anterior.
+
+```rust
+let arrivals_ms: Vec<i32> = vec![0, 0, 50, 50, 100, 100, 150, 200, 250, 300];   // Cambiar a los offsets deseados.
+```
+
+Por lo que si ponemos `[0, 50, 100]`:
+- **P0** llega en 0ms.
+- **P1** llega en 50ms.
+- **P2** llega en 150ms.
+
 
 ## Ejemplos
 

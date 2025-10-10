@@ -148,7 +148,8 @@ fn main() {
 
     // ---------- CONFIGURACIÓN ----------
     let arrivals_ms: Vec<i32> = vec![0, 0, 50, 50, 100, 100, 150, 200, 250, 300];   // Llegadas programadas como offsets en ms desde `start`.
-    //let arrivals_ms: Vec<i32> = vec![0, 0];   // Llegadas programadas como offsets en ms desde `start`.
+    //let arrivals_ms: Vec<i32> = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    //let arrivals_ms: Vec<i32> = vec![0, 0];
     let n_products = arrivals_ms.len();
 
     // ---------- RELOJ ----------

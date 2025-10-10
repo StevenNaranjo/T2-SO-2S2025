@@ -18,7 +18,7 @@ pub struct Product {
 }
 
 impl Product {
-    /// Crea un producto con métricas en 0.
+    // Crea un producto con métricas en 0.
     pub fn new(id: i32, arrival_ms: i32) -> Self {
         Self {
             id,
@@ -33,9 +33,9 @@ impl Product {
     }
 }
 
-/// puntero compartido y seguro a mutuo acceso de un Product.
-/// - `Arc` permite compartir entre hilos.
-/// - `Mutex` protege el acceso concurrente al `Product`.
+/// Puntero compartido y seguro a mutuo acceso de un Product.
+// - `Arc` permite compartir entre hilos.
+// - `Mutex` protege el acceso concurrente al `Product`.
 pub type SharedProduct = Arc<Mutex<Product>>;
 
 /// Estructura con el buffer real (VecDeque) de punteros a productos.
@@ -52,7 +52,7 @@ pub struct ProdQueue {
 }
 
 impl ProdQueue {
-    /// Construye la cola acotada con la capacidad indicada y la envuelve en `Arc` para poder clonarla y compartirla entre hilos.
+    // Construye la cola acotada con la capacidad indicada y la envuelve en `Arc` para poder clonarla y compartirla entre hilos.
     pub fn new(capacity: usize) -> Arc<Self> {
         Arc::new(Self {
             inner: Mutex::new(Inner { buf: VecDeque::with_capacity(capacity) }),

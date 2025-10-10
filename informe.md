@@ -47,6 +47,8 @@ Tiempos de procesamiento por estación:
  - Empaque    (#3, FCFS)            → 120 ms
 ```
 
+<div style="break-after:page"></div>
+
 Y nos retornará este informe:
 | ID | Arr(ms)  | E1_in | E1_out | Wait1 | E2_in | E2_out | Wait2 | E3_in | E3_out | Wait3 | Turn(ms) | WaitTot  |
 |----|----------|-------|--------|-------|-------|--------|-------|-------|--------|-------|----------|----------|
@@ -89,6 +91,8 @@ El módulo `estaciones.rs` implementa el núcleo del mecanismo de intercomunicac
 - *Mutex (Mutual Exclusion): Garantiza que solo un hilo acceda o modifique los datos de la cola a la vez.*
 
 - *Condvar (Condition Variable): Suspende un hilo hasta que se cumpla una condición concreta*
+
+<div style="break-after:page"></div>
 
 #### Mecanismo de Bloqueo
 ```rust
@@ -136,6 +140,8 @@ q_out.push(sp.clone());
 En este algoritmo, cada producto es atendido completamente antes de pasar al siguiente.
 El hilo de la estación se mantiene bloqueado hasta recibir un nuevo producto, asegurando procesamiento exclusivo por estación y sin interferencias concurrentes.
 
+<div style="break-after:page"></div>
+
 #### RR: Procesamiento por Quantum
 
 ```rust
@@ -176,6 +182,8 @@ Cada estación se lanza en su propio hilo con `thread::spawn`, recibiendo clones
 #### Recolector e Informe Final
 El recolector (`q_done.pop()`) centraliza las métricas una vez que los productos terminan.
 Calcula los tiempos de turnaround, espera total y espera por estación. Los resultados se muestran tabulados con promedios.
+
+<div style="break-after:page"></div>
 
 ### 4. Ventajas Técnicas y Robustez
 
@@ -218,6 +226,8 @@ Tiempos de procesamiento por estación:
 | 8  | 905      | 968   | 1088   | 63    | 1889  | 2109   | 800   | 2111  | 2211   | 1     | 1306     | 866      |
 | 9  | 1205     | 1206  | 1326   | 1     | 2111  | 2331   | 784   | 2331  | 2432   | 1     | 1227     | 787      |
 | **AVG** | — | — | — | **168.90** | — | — | **439.20** | — | — | **0.70** | **1050.00** | **610.00** |
+
+<div style="break-after:page"></div>
 
 #### Análisis
 El algoritmo FCFS muestra un comportamiento estable y sin tantos cambios de contexto. Los productos son procesados de forma ordenada, y el sistema mantiene un flujo continuo sin interrupciones.
@@ -280,7 +290,7 @@ Sin embargo, permite que todos los productos avancen de manera progresiva, reduc
 
 - Turnaround promedio más alto que en FCFS.
 
-### Comparativa Global
+### Comparativa Final
 | Métrica                   | FCFS (ms) | RR (ms) | Diferencia     |
 | ------------------------- | --------- | ------- | -------------- |
 | **Turnaround promedio**   | 1050.0    | 1594.2  | 544.2          |
@@ -292,3 +302,18 @@ Sin embargo, permite que todos los productos avancen de manera progresiva, reduc
 Los resultados demuestran que FCFS es más eficiente en términos de throughput y tiempo promedio, pero sacrifica equidad y tiempo de respuesta inicial.
 Por el contrario, Round Robin mejora la equidad y simula un entorno más realista para sistemas multitarea, a costa de un mayor overhead y tiempos de espera totales.
 En un contexto industrial o de simulación de línea de ensamblaje, FCFS es más adecuado cuando se busca maximizar productividad y predictibilidad en estaciones que tienen una duración de procesado fija, mientras que RR resulta útil cuando se prioriza la distribución justa del recurso o la representación de un comportamiento preemptivo tipo CPU.
+
+| **Criterio** | **FCFS (First-Come, First-Served)** | **RR (Round Robin, q=80 ms)** |
+|--------------|--------------------------------------|-------------------------------|
+| **Política de planificación** | No apropiativa. Atiende cada producto completo antes de pasar al siguiente. | Apropiativa. Interrumpe el procesamiento tras un *quantum* y reencola el producto. |
+| **Orden de atención** | Estrictamente según orden de llegada (determinista). | Todos los productos avanzan progresivamente (cíclico y equitativo). |
+| **Control de flujo** | Una cola FIFO por estación. | Requiere gestión de reencolado y conteo de tiempo restante. |
+| **Uso de CPU / recursos** | Menor overhead, sin interrupciones ni cambios de contexto. | Mayor overhead por interrupciones y operaciones de reencolado. |
+| **Tiempo de espera promedio** | Más bajo. Menos alternancia, pero más acumulación para tareas largas. | Más alto. Aumenta por fragmentación temporal y sobrecarga de contexto. |
+| **Turnaround promedio** | Más bajo; flujo lineal y predecible. | Más alto; cada producto tarda más en completarse por reencolado frecuente. |
+| **Equidad entre productos** | Baja. Las primeras tareas monopolizan la estación. | Alta. Cada producto obtiene oportunidad de avance en cada ciclo. |
+| **Efecto “convoy”** | Presente. Los productos cortos esperan a los largos. | Eliminado. Los productos cortos progresan junto a los largos. |
+| **Adecuado para** | Sistemas con cargas homogéneas y operaciones determinísticas como las líneas de ensamblaje fijas. | Sistemas con procesos con tiempos de burst distintos a donde la equidad es más importante. |
+| **Complejidad de implementación** | Baja: basta una cola FIFO y `sleep()` por producto. | Media: requiere control de *quantum*, reencolado y actualización de tiempo restante. |
+| **Problemas comunes** | Starvation de productos que llegan tarde si el flujo es continuo. | Overhead excesivo si el *quantum* es demasiado pequeño; si es muy grande funciona como fcfs. |
+| **Resumen general** | Mayor rendimiento promedio y predictibilidad, pero menor justicia. | Mayor equidad, pero con más espera total y turnaround. |

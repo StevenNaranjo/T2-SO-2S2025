@@ -31,7 +31,7 @@ T2-SO-2S2025/
 │   └── mutex_demo.rs           # Prueba de concepto de exclusión mútua.
 ├── Cargo.toml
 ├── README.md                   # Este archivo.
-└── informe.md                  # Informe técnico de la solución.
+└── Informe.pdf                 # Informe técnico de la solución.
 ```
 
 ---

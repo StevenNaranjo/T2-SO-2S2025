@@ -116,14 +116,14 @@ fn main() {
         // ======== USA UNA DE LAS DOS OPCIONES ========
 
         // Opción A: Round Robin
-        thread::spawn(move || {
-            estacion_round_robin("Estación (RR)", 0, s_quantum, s_work_ms, in_q, out_q, start_s);
-        });
+        // thread::spawn(move || {
+        //     estacion_round_robin("Estación (RR)", 0, s_quantum, s_work_ms, in_q, out_q, start_s);
+        // });
 
         // Opción B: FCFS
-        // thread::spawn(move || {
-        //     estacion_fcfs("Estación (FCFS)", 0, s_work_ms, in_q, out_q, start_s);
-        // });
+        thread::spawn(move || {
+            estacion_fcfs("Estación (FCFS)", 0, s_work_ms, in_q, out_q, start_s);
+        });
     }
 
     // ---------- RECOLECTOR FINAL ----------

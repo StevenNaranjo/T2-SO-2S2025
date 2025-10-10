@@ -12,13 +12,16 @@ use funciones::{estacion_fcfs, estacion_round_robin};
 /// Fila del informe final con las métricas de cada producto tras pasar por 3 estaciones.
 #[derive(Debug)]
 struct ReportRow {
-    id: i32,                    // ID del producto
-    arrival: i32,               // llegada real (ms desde start) medida por el generador
-    e1_in: i64,  e1_out: i64,   // tiempos de entrada/salida en estación 1
-    e2_in: i64,  e2_out: i64,   // tiempos de entrada/salida en estación 2
-    e3_in: i64,  e3_out: i64,   // tiempos de entrada/salida en estación 3
-    turnaround: i64,            // tiempo total en el sistema = e3_out - arrival
-    wait_time: i64,             // tiempo total de espera = turnaround - (suma de work_ms de cada estación)
+    id: i32,                            // ID del producto
+    arrival: i32,                       // llegada real (ms desde start) medida por el generador
+    e1_in: i64,  e1_out: i64,           // tiempos de entrada/salida en estación 1
+    e2_in: i64,  e2_out: i64,           // tiempos de entrada/salida en estación 2
+    e3_in: i64,  e3_out: i64,           // tiempos de entrada/salida en estación 3
+    turnaround: i64,                    // tiempo total en el sistema = e3_out - arrival
+    wait_time: i64,                     // tiempo total de espera = turnaround - (suma de work_ms de cada estación)
+    w1: i64,
+    w2: i64,
+    w3: i64,
 }
 
 /// Tipo de planificación de una estación: FCFS o RR (con quantum).
@@ -80,25 +83,25 @@ fn parse_station(args: &[String], idx: &mut usize, label: &str) -> Result<Statio
 /// Imprime la tabla del informe con promedios.
 fn print_report(rows: &[ReportRow]) {
     // Cabecera
-    println!("\n{:=^120}", "  INFORME FINAL  ");
+    println!("\n{:=^140}", "  INFORME FINAL  ");
     println!(
-        "{:<4} {:>8} │ {:>8} {:>8} │ {:>8} {:>8} │ {:>8} {:>8} │ {:>10} {:>10}",
+        "{:<4} {:>8} │ {:>8} {:>8} {:>8} │ {:>8} {:>8} {:>8} │ {:>8} {:>8} {:>8} │ {:>10} {:>10}",
         "ID", "Arr(ms)",
-        "E1_in", "E1_out",
-        "E2_in", "E2_out",
-        "E3_in", "E3_out",
-        "Turn(ms)", "Wait(ms)"
+        "E1_in", "E1_out", "Wait1",
+        "E2_in", "E2_out", "Wait2",
+        "E3_in", "E3_out", "Wait3",
+        "Turn(ms)", "WaitTot"
     );
-    println!("{:-<120}", "");
+    println!("{:-<140}", "");
 
     // Filas
     for r in rows {
         println!(
-            "{:<4} {:>8} │ {:>8} {:>8} │ {:>8} {:>8} │ {:>8} {:>8} │ {:>10} {:>10}",
+            "{:<4} {:>8} │ {:>8} {:>8} {:>8} │ {:>8} {:>8} {:>8} │ {:>8} {:>8} {:>8} │ {:>10} {:>10}",
             r.id, r.arrival,
-            r.e1_in, r.e1_out,
-            r.e2_in, r.e2_out,
-            r.e3_in, r.e3_out,
+            r.e1_in, r.e1_out, r.w1,
+            r.e2_in, r.e2_out, r.w2,
+            r.e3_in, r.e3_out, r.w3,
             r.turnaround, r.wait_time
         );
     }
@@ -108,12 +111,16 @@ fn print_report(rows: &[ReportRow]) {
     let avg_turn: f64 = rows.iter().map(|r| r.turnaround as f64).sum::<f64>() / n;
     let avg_wait: f64 = rows.iter().map(|r| r.wait_time as f64).sum::<f64>() / n;
 
-    println!("{:-<120}", "");
+    let avg_w1: f64 = rows.iter().map(|r| r.w1 as f64).sum::<f64>() / n;
+    let avg_w2: f64 = rows.iter().map(|r| r.w2 as f64).sum::<f64>() / n;
+    let avg_w3: f64 = rows.iter().map(|r| r.w3 as f64).sum::<f64>() / n;
+
+    println!("{:-<140}", "");
     println!(
-        "{:<4} {:>8} │ {:>8} {:>8} │ {:>8} {:>8} │ {:>8} {:>8} │ {:>10.2} {:>10.2}",
-        "AVG", "", "", "", "", "", "", "", avg_turn, avg_wait
+        "{:<4} {:>8} │ {:>8} {:>8} {:>8.2} │ {:>8} {:>8} {:>8.2} │ {:>8} {:>8} {:>8.2} │ {:>10.2} {:>10.2}",
+        "AVG", "", "", "", avg_w1, "", "", avg_w2, "", "", avg_w3, avg_turn, avg_wait
     );
-    println!("{:=<120}", "");
+    println!("{:=<140}", "");
 }
 
 fn main() {
@@ -141,6 +148,7 @@ fn main() {
 
     // ---------- CONFIGURACIÓN ----------
     let arrivals_ms: Vec<i32> = vec![0, 0, 50, 50, 100, 100, 150, 200, 250, 300];   // Llegadas programadas como offsets en ms desde `start`.
+    //let arrivals_ms: Vec<i32> = vec![0, 0];   // Llegadas programadas como offsets en ms desde `start`.
     let n_products = arrivals_ms.len();
 
     // ---------- RELOJ ----------
@@ -172,6 +180,7 @@ fn main() {
                 {
                     let mut p = sp.lock().unwrap();
                     p.arrival_ms = arrival_now;
+                    p.queue_arrival[0] = ms_since(start0); 
                 }
 
                 println!("{}ms, Generador: Encolando producto #{} (arrival real: {} ms, offset pedido: {} ms)", ms_since(start0), i, arrival_now, offset_ms);
@@ -252,7 +261,7 @@ fn main() {
         let sp = q_done.pop();
 
         // Lee todos los campos que necesita bajo lock y calcula métricas
-        let (id, arrival, e1_in, e1_out, e2_in, e2_out, e3_in, e3_out, turnaround, wait_time);
+        let (id, arrival, e1_in, e1_out, e2_in, e2_out, e3_in, e3_out, turnaround, wait_time, w1, w2, w3);
         {
             let mut p = sp.lock().unwrap();
             p.finished = true;
@@ -263,6 +272,10 @@ fn main() {
             e2_in = p.entry_time[1];  e2_out = p.exit_time[1];
             e3_in = p.entry_time[2];  e3_out = p.exit_time[2];
 
+            let q_e1 = p.queue_arrival[0];
+            let q_e2 = p.queue_arrival[1];
+            let q_e3 = p.queue_arrival[2];
+
             // turnaround: tiempo total desde llegada real hasta salida de E3
             turnaround = e3_out - arrival as i64;
 
@@ -271,11 +284,20 @@ fn main() {
 
             // espera total: turnaround - servicio
             wait_time = turnaround - processing_sum;
+
+            let turnaround1 = (e1_out - q_e1);
+            let turnaround2 = (e2_out - q_e2);
+            let turnaround3 = (e3_out - q_e3);
+
+            w1 = turnaround1 - e1.work_ms as i64;
+            w2 = turnaround2 - e2.work_ms as i64;
+            w3 = turnaround3 - e3.work_ms as i64;
+
         } // Se libera el mutex aquí
 
         // Guarda la fila en el vector para imprimir luego
         report_rows.push(ReportRow {
-            id, arrival, e1_in, e1_out, e2_in, e2_out, e3_in, e3_out, turnaround, wait_time,
+            id, arrival, e1_in, e1_out, e2_in, e2_out, e3_in, e3_out, turnaround, wait_time, w1, w2, w3
         });
 
         finished += 1;

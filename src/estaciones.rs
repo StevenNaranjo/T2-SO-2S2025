@@ -8,12 +8,13 @@ pub const QUEUE_CAPACITY: usize = 32;
 #[derive(Debug)]
 pub struct Product {
     pub id: i32,
-    pub arrival_ms: i32,        // llegada simulada (para el productor)
-    pub entry_time: [i64; 3],   // ms desde start al "primer entry" por estación
-    pub exit_time:  [i64; 3],   // ms desde start al "exit" por estación
-    pub entered: [bool; 3],     // true si ya entró alguna vez
-    pub finished: bool,         // true cuando sale de la última estación
-    pub remaining_rr: i32,      // restante solo para estaciones Round Robin (se reinicia al entrar)
+    pub arrival_ms: i32,            // llegada simulada (para el productor)
+    pub entry_time: [i64; 3],       // ms desde start al "primer entry" por estación
+    pub exit_time:  [i64; 3],       // ms desde start al "exit" por estación
+    pub entered: [bool; 3],         // true si ya entró alguna vez
+    pub queue_arrival: [i64; 4],    // ms desde start a la llegada a la cola de cada estación
+    pub finished: bool,             // true cuando sale de la última estación
+    pub remaining_rr: i32,          // restante solo para estaciones Round Robin (se reinicia al entrar)
 }
 
 impl Product {
@@ -25,6 +26,7 @@ impl Product {
             entry_time: [0; 3],
             exit_time: [0; 3],
             entered: [false; 3],
+            queue_arrival: [0; 4],
             finished: false,
             remaining_rr: 0,
         }

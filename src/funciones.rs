@@ -44,7 +44,11 @@ pub fn estacion_fcfs(
         println!("{}ms, {}: Producto #{} finalizado en esta estación", ms_since(start), name, p.id);
         
         match &out_q {
-            Some(q_out) => q_out.push(sp.clone()),
+            Some(q_out) => {
+                    let next = station_idx + 1;
+                    p.queue_arrival[next] = ms_since(start);
+                    q_out.push(sp.clone());
+                },
             None => p.finished = true,
         }
     }
@@ -104,7 +108,11 @@ pub fn estacion_round_robin(
             println!("{}ms, {}: Producto #{} finalizado en esta estación", ms_since(start), name, p.id);
             
             match &out_q {
-                Some(q_out) => q_out.push(sp.clone()),
+                Some(q_out) => {
+                    let next = station_idx + 1;
+                    p.queue_arrival[next] = ms_since(start);
+                    q_out.push(sp.clone());
+                },
                 None => p.finished = true,
             }
         } else {                    // Producto no terminado, reencolar

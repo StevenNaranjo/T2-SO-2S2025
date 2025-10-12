@@ -19,7 +19,7 @@ fn demo_seccion_critica() {
         
         joins.push(thread::spawn(move || {
             // Simula trabajo antes de intentar entrar
-            thread::sleep(Duration::from_millis(50 * id as u64));
+            thread::sleep(Duration::from_millis(50 as u64));
 
             // Tomar el lock de la puerta (entrar a la sección crítica)
             let _pass = puerta.lock().expect("mutex poisoned");
@@ -52,7 +52,7 @@ fn demo_seccion_critica_sin_mutex() {
         
         joins.push(thread::spawn(move || {
             // Simula trabajo antes de intentar entrar
-            thread::sleep(Duration::from_millis(50 * id as u64));
+            thread::sleep(Duration::from_millis(50 as u64));
 
             // Eentra a la sección crítica
             println!("Hilo {id}: ENTER");

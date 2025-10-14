@@ -16,6 +16,9 @@ El sistema permite seleccionar dinámicamente el algoritmo de planificación uti
 
 El objetivo es analizar el impacto de ambos algoritmos en métricas como el tiempo de espera, turnaround, y orden de finalización.
 
+### Vídeo Explicativo
+Se puede encontrar un vídeo explicando los distintos componentes de esta solución en este [link](https://www.youtube.com/watch?v=4eA47CCWChk).
+
 ---
 
 ### Estructura del Proyecto
